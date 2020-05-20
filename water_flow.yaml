@@ -1,0 +1,45 @@
+esphome:
+  name: water_flow
+  platform: ESP8266
+  board: nodemcuv2
+  includes:
+    - water_flow/src/water_flow.h
+
+wifi:
+  ssid: "XXXX"
+  password: "XXXX"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "XXXX"
+    password: "XXXX"
+
+captive_portal:
+
+# Enable Home Assistant API
+api:
+  password: "XXXX"
+
+ota:
+  password: "XXXX"
+    
+sensor:
+- platform: custom
+  lambda: |-
+    auto wf = new WaterFlowSensor();
+    App.register_component(wf);
+    return {wf->flow_rate_gpm_sensor, wf->gallons_used_sensor};
+  sensors:
+  - name: "Water Flow Rate"
+    unit_of_measurement: GPM
+    accuracy_decimals: 2
+    id: flow_rate
+  - name: "Total Gallons Used"
+    unit_of_measurement: Gal
+    accuracy_decimals: 2
+
+binary_sensor:
+  - platform: template
+    name: "Water Running"
+    lambda: |-
+      return (id(flow_rate).state > 0);
