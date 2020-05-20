@@ -1,4 +1,4 @@
-# Whole-House-Water-Monitoring
+# Whole House Water Monitoring
 This is a tutorial on how to monitor whole-house water usage using ESPHome integrated with Home Assistant. This assumes you already have ESPHome and Home Assistant setup.
 
 Some example use cases would be to: 
