@@ -37,12 +37,12 @@ sensor:
     return {wf->flow_rate_gpm_sensor, wf->gallons_used_sensor};
   sensors:
   - name: "Water Flow Rate"
-    unit_of_measurement: . # using this because you have to have a unit_of_measurement to see the history graph, but the guage card doesn't look good when displaying a unit
+    unit_of_measurement: . # using this because you have to specify a unit_of_measurement to see the history graph, but the guage card doesn't look good when displaying a unit
     #unit_of_measurement: GPM
     accuracy_decimals: 2
     id: flow_rate
   - name: "Total Gallons Used"    
-    unit_of_measurement: . # using this because you have to have a unit_of_measurement to see the history graph, but the guage card doesn't look good when displaying a unit
+    unit_of_measurement: . # using this because you have to specify a unit_of_measurement to see the history graph, but the guage card doesn't look good when displaying a unit
     #unit_of_measurement: Gal
     accuracy_decimals: 2
     # Every ten gallons used, we will write the value to flash so it can be restored if power is ever lost
