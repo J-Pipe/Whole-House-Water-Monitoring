@@ -1,0 +1,189 @@
+[
+    {
+        "id": "d4269b7.c612868",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "8fb39cf.15319e",
+        "type": "api-call-service",
+        "z": "d4269b7.c612868",
+        "name": "call",
+        "server": "XXXX",
+        "version": 1,
+        "debugenabled": false,
+        "service_domain": "",
+        "service": "",
+        "entityId": "",
+        "data": "",
+        "dataType": "json",
+        "mergecontext": "",
+        "output_location": "",
+        "output_location_type": "none",
+        "mustacheAltTags": false,
+        "x": 802,
+        "y": 286,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1f32df4c.e93e21",
+        "type": "server-state-changed",
+        "z": "d4269b7.c612868",
+        "name": "Water running?",
+        "server": "XXXX",
+        "version": 1,
+        "exposeToHomeAssistant": false,
+        "haConfig": [
+            {
+                "property": "name",
+                "value": ""
+            },
+            {
+                "property": "icon",
+                "value": ""
+            }
+        ],
+        "entityidfilter": "binary_sensor.water_running",
+        "entityidfiltertype": "exact",
+        "outputinitially": false,
+        "state_type": "str",
+        "haltifstate": "on",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "outputs": 2,
+        "output_only_on_state_change": true,
+        "x": 173,
+        "y": 321,
+        "wires": [
+            [
+                "f182510e.ee1938",
+                "2f6c80c1.5e7418"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "f182510e.ee1938",
+        "type": "function",
+        "z": "d4269b7.c612868",
+        "name": "When sleeping, or no one is home, Send notification",
+        "func": "const states = global.get('homeassistant').homeAssistant.states;\nvar d = new Date();\nvar hours = d.getHours();\n\n// This will send a push notification when water is flowing AND\n// my input_boolean for notifications is turned on AND\n// no one is home, or we are all sleeping AND\n// it is earlier than 6am\nvar send = (states[\"input_boolean.send_water_notifications\"].state == \"on\") && ((states[\"input_boolean.home_occupied\"].state == \"off\") || ((states[\"input_boolean.sleeping\"].state == \"on\") && (hours < 6)));\n\nif (send) {\n    var msg1 = { \n        payload: \n        {\n            \"domain\":\"notify\",\n            \"service\":\"mobile_app_my_iphone\",\n            \"data\":\n            {\n                \"title\":\"Water Flow Detected!\",\n                \"message\":\"Water flow of \" + states[\"sensor.water_flow_rate\"].state + \" detected.\",\n                \"data\":\n                {\n                    \"push\":\n                    {\n                        \"sound\": \"SOSFallDetectionPrompt_Haptic.caf\"\n                    }\n                }\n            }\n        }\n    };\n    return [msg1];\n}\n\nreturn null;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 503,
+        "y": 329,
+        "wires": [
+            [
+                "8fb39cf.15319e"
+            ]
+        ]
+    },
+    {
+        "id": "2f6c80c1.5e7418",
+        "type": "ha-wait-until",
+        "z": "d4269b7.c612868",
+        "name": "for extended time?",
+        "server": "XXXX",
+        "outputs": 2,
+        "entityId": "binary_sensor.water_running",
+        "entityIdFilterType": "exact",
+        "property": "state",
+        "comparator": "is",
+        "value": "off",
+        "valueType": "str",
+        "timeout": "30",
+        "timeoutType": "num",
+        "timeoutUnits": "minutes",
+        "entityLocation": "",
+        "entityLocationType": "none",
+        "checkCurrentState": true,
+        "blockInputOverrides": true,
+        "x": 386.5,
+        "y": 273,
+        "wires": [
+            [],
+            [
+                "974e6d2f.ca7b5"
+            ]
+        ]
+    },
+    {
+        "id": "974e6d2f.ca7b5",
+        "type": "function",
+        "z": "d4269b7.c612868",
+        "name": "Send notification",
+        "func": "var msg1 = { \n    payload: \n    {\n        \"domain\":\"notify\",\n        \"service\":\"mobile_app_my_iphone\",\n        \"data\":\n        {\n            \"title\":\"Continuous Water Flow!\",\n            \"message\":\"Water has been running for 30 minutes\",\n            \"data\":\n            {\n                \"push\":\n                {\n                    \"sound\": \"SOSFallDetectionPrompt_Haptic.caf\"\n                }\n            }\n        }\n    }\n};\nreturn [msg1];\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 608,
+        "y": 271,
+        "wires": [
+            [
+                "8fb39cf.15319e"
+            ]
+        ]
+    },
+    {
+        "id": "c7bcc0d3.170d68",
+        "type": "server-state-changed",
+        "z": "d4269b7.c612868",
+        "name": "esp reset?",
+        "server": "XXXX",
+        "version": 1,
+        "exposeToHomeAssistant": false,
+        "haConfig": [
+            {
+                "property": "name",
+                "value": ""
+            },
+            {
+                "property": "icon",
+                "value": ""
+            }
+        ],
+        "entityidfilter": "sensor.total_gallons_used",
+        "entityidfiltertype": "exact",
+        "outputinitially": false,
+        "state_type": "str",
+        "haltifstate": "unknown",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "outputs": 2,
+        "output_only_on_state_change": true,
+        "x": 166.5,
+        "y": 207,
+        "wires": [
+            [
+                "9ed7ebed.563488"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "9ed7ebed.563488",
+        "type": "api-call-service",
+        "z": "d4269b7.c612868",
+        "name": "restore gallons used",
+        "server": "XXXX",
+        "version": 1,
+        "debugenabled": false,
+        "service_domain": "esphome",
+        "service": "water_flow_power_cycle_restore",
+        "entityId": "",
+        "data": "",
+        "dataType": "json",
+        "mergecontext": "",
+        "output_location": "",
+        "output_location_type": "none",
+        "mustacheAltTags": false,
+        "x": 378.5,
+        "y": 206,
+        "wires": [
+            []
+        ]
+    }
+]
