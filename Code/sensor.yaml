@@ -1,0 +1,98 @@
+- platform: template
+  sensors:
+    water_bill:
+      friendly_name: Current Cost
+      unit_of_measurement: $
+      entity_id:  sensor.total_gallons_used    
+      value_template: >-
+                      {% set price = 0.0 %}
+                      {% set otherCharges = 5.75 + 10.83 + 3.09 %} {# StormWater/Garbage/Recycle #}
+                      {% set originalGallons = states('sensor.total_gallons_used')|int %}
+
+                      {############# Water Rate ############}
+                      {% set waterTier1Price = 24.56 %}
+                      {% set waterTier2Price = 5.37 %}
+                      {% set waterTier3Price = 8.13 %}
+                      {% set waterTier4Price = 9.57 %}
+                      {% set waterTier5Price = 13.81 %}
+
+                      {% set waterTier1MaxGal = 2000 %}
+                      {% set waterTier2MaxGal = 10000 %}
+                      {% set waterTier3MaxGal = 20000 %}
+                      {% set waterTier4MaxGal = 30000 %}
+
+                      {% set gallons = originalGallons %}
+
+                      {% if gallons > waterTier4MaxGal %}
+                        {% set price = price + ((gallons - waterTier4MaxGal) / 1000.0 * waterTier5Price)|round(2) %}
+                        {% set gallons = waterTier4MaxGal %}
+                      {% endif %}
+                      {% if gallons > waterTier3MaxGal %}
+                        {% set price = price + ((gallons - waterTier3MaxGal) / 1000.0 * waterTier4Price)|round(2) %}
+                        {% set gallons = waterTier3MaxGal %}
+                      {% endif %}
+                      {% if gallons > waterTier2MaxGal %}
+                        {% set price = price + ((gallons - waterTier2MaxGal) / 1000.0 * waterTier3Price)|round(2) %}
+                        {% set gallons = waterTier2MaxGal %}
+                      {% endif %}
+                      {% if gallons > waterTier1MaxGal %}
+                        {% set price = price + ((gallons - waterTier1MaxGal) / 1000.0 * waterTier2Price)|round(2) %}
+                      {% endif %}
+                      {% set price = (price + waterTier1Price)|round(2) %}
+
+
+                      {############# Sewer Rate #############}
+                      {% set sewerTier1Price = 25.54 %}
+                      {% set sewerTier2Price = 6.37 %}
+                      {% set sewerTier3Price = 7.88 %}
+                      {% set sewerTier4Price = 7.88 %}
+
+                      {% set sewerTier1MaxGal = 2000 %}
+                      {% set sewerTier2MaxGal = 5000 %}
+                      {% set sewerTier3MaxGal = 12000 %}
+
+                      {% set gallons = originalGallons %}
+
+                      {% if gallons > sewerTier3MaxGal %}
+                        {% set price = (price + ((gallons - sewerTier3MaxGal) / 1000.0 * sewerTier4Price))|round(2) %}
+                        {% set gallons = sewerTier3MaxGal %}
+                      {% endif %}
+                      {% if gallons > sewerTier2MaxGal %}
+                        {% set price = (price + ((gallons - sewerTier2MaxGal) / 1000.0 * sewerTier3Price))|round(2) %}
+                        {% set gallons = sewerTier2MaxGal %}
+                      {% endif %}
+                      {% if gallons > sewerTier1MaxGal %}
+                        {% set price = (price + ((gallons - sewerTier1MaxGal) / 1000.0 * sewerTier2Price))|round(2) %}
+                      {% endif %}
+                      {% set price = (price + sewerTier1Price)|round(2) %}
+
+                      {############# Final #############}
+                      {{(price + otherCharges)|round(2)}}
+
+    water_bill_days_left_in_cycle: 
+      friendly_name: Days Left In Cycle
+      unit_of_measurement: Days
+      entity_id: sensor.date
+      value_template: >-
+                      {% set resetDay = 18 %}
+                      {% set daysInMonth = 0 %}
+
+                      {% if now().month in [1,3,5,7,8,10,12] %}
+                        {% set daysInMonth = 31 %}
+                      {% elif now().month in [4,6,9,11] %}
+                        {% set daysInMonth = 30 %}
+                      {% elif now().month == 2 and ((now().year-2000) % 4 > 0) %}
+                        {% set daysInMonth = 28 %}
+                      {% elif now().month == 2 and ((now().year-2000) % 4 == 0) %}
+                        {% set daysInMonth = 29 %}
+                      {% endif %}
+
+                      {% if (resetDay - (now().strftime('%d')|int)) > 0 %}
+                        {{ (resetDay - (now().strftime('%d')|int)) }}
+                      {% else %}
+                        {{ daysInMonth - (((now().strftime('%d')|int)) - resetDay) }}
+                      {%- endif %}
+
+- platform: time_date
+  display_options:
+    - 'date'
