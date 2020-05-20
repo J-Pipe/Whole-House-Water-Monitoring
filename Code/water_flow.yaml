@@ -23,6 +23,12 @@ api:
 ota:
   password: "XXXX"
     
+# This is for saving the Total Gallons Used every ten gallons, incase of a power cycle
+globals:
+  - id: saved_gallons_count
+    type: int
+    restore_value: yes
+    
 sensor:
 - platform: custom
   lambda: |-
@@ -31,12 +37,21 @@ sensor:
     return {wf->flow_rate_gpm_sensor, wf->gallons_used_sensor};
   sensors:
   - name: "Water Flow Rate"
-    unit_of_measurement: GPM
+    unit_of_measurement: . # using this because you have to have a unit_of_measurement to see the history graph, but the guage card doesn't look good when displaying a unit
+    #unit_of_measurement: GPM
     accuracy_decimals: 2
     id: flow_rate
-  - name: "Total Gallons Used"
-    unit_of_measurement: Gal
+  - name: "Total Gallons Used"    
+    unit_of_measurement: . # using this because you have to have a unit_of_measurement to see the history graph, but the guage card doesn't look good when displaying a unit
+    #unit_of_measurement: Gal
     accuracy_decimals: 2
+    # Every ten gallons used, we will write the value to flash so it can be restored if power is ever lost
+    on_value:
+      then:
+        - lambda: |-
+            if (!((int)x % 10) && ((int)x != id(saved_gallons_count) && ((int)x != 0))) {
+              id(saved_gallons_count) = x;
+            }
 
 binary_sensor:
   - platform: template
