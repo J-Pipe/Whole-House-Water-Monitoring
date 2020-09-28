@@ -2,9 +2,10 @@ esphome:
   name: water_flow
   platform: ESP8266
   board: nodemcuv2
+  esp8266_restore_from_flash: true
   includes:
     - water_flow/src/water_flow.h
-
+  
 wifi:
   ssid: "XXXX"
   password: "XXXX"
@@ -16,41 +17,45 @@ wifi:
 
 captive_portal:
 
+# Enable logging
+logger:
+
 # Enable Home Assistant API
 api:
   password: "XXXX"
 
 ota:
   password: "XXXX"
-    
-# This is for saving the Total Gallons Used every ten gallons, incase of a power cycle
+  
+# This is for saving the total_water_used_sensor every ten gallons/liters, incase of a power cycle
 globals:
-  - id: saved_gallons_count
+  - id: saved_usage_count
     type: int
     restore_value: yes
+  - id: save_usage_frequency
+    type: int    
+    initial_value: 'UNITS'
     
 sensor:
 - platform: custom
   lambda: |-
     auto wf = new WaterFlowSensor();
     App.register_component(wf);
-    return {wf->flow_rate_gpm_sensor, wf->gallons_used_sensor};
+    return {wf->flow_rate_sensor, wf->total_water_used_sensor};
   sensors:
   - name: "Water Flow Rate"
-    unit_of_measurement: . # using this because you have to specify a unit_of_measurement to see the history graph, but the guage card doesn't look good when displaying a unit
-    #unit_of_measurement: GPM
+    unit_of_measurement: GPM # Gallons or Liters per minute
     accuracy_decimals: 2
     id: flow_rate
-  - name: "Total Gallons Used"    
-    unit_of_measurement: . # using this because you have to specify a unit_of_measurement to see the history graph, but the guage card doesn't look good when displaying a unit
-    #unit_of_measurement: Gal
+  - name: "Total Water Used"
+    unit_of_measurement: Gal
     accuracy_decimals: 2
-    # Every ten gallons used, we will write the value to flash so it can be restored if power is ever lost
+    # Every so often, we will write the value to flash so it can be restored if power is ever lost
     on_value:
       then:
         - lambda: |-
-            if (!((int)x % 10) && ((int)x != id(saved_gallons_count) && ((int)x != 0))) {
-              id(saved_gallons_count) = x;
+            if (!((int)x % id(save_usage_frequency)) && ((int)x != id(saved_usage_count) && ((int)x != 0))) {
+              id(saved_usage_count) = x;
             }
 
 binary_sensor:
