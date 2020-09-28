@@ -17,9 +17,6 @@ wifi:
 
 captive_portal:
 
-# Enable logging
-logger:
-
 # Enable Home Assistant API
 api:
   password: "XXXX"
@@ -27,7 +24,7 @@ api:
 ota:
   password: "XXXX"
   
-# This is for saving the total_water_used_sensor every ten gallons/liters, incase of a power cycle
+# This is for saving the total_water_used_sensor every so often, incase of a power cycle
 globals:
   - id: saved_usage_count
     type: int
