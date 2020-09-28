@@ -145,7 +145,7 @@
                 "value": ""
             }
         ],
-        "entityidfilter": "sensor.total_gallons_used",
+        "entityidfilter": "sensor.total_water_used",
         "entityidfiltertype": "exact",
         "outputinitially": false,
         "state_type": "str",
@@ -167,7 +167,7 @@
         "id": "9ed7ebed.563488",
         "type": "api-call-service",
         "z": "d4269b7.c612868",
-        "name": "restore gallons used",
+        "name": "restore water used",
         "server": "XXXX",
         "version": 1,
         "debugenabled": false,
