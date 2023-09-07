@@ -45,7 +45,9 @@ sensor:
     accuracy_decimals: 2
     id: flow_rate
   - name: "Total Water Used"
-    unit_of_measurement: Gal
+    device_class: "water"
+    state_class: "total_increasing"
+    unit_of_measurement: "gal"
     accuracy_decimals: 2
     # Every so often, we will write the value to flash so it can be restored if power is ever lost
     on_value:
