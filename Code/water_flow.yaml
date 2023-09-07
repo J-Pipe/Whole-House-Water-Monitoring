@@ -44,6 +44,8 @@ sensor:
     unit_of_measurement: GPM # Gallons or Liters per minute
     accuracy_decimals: 2
     id: flow_rate
+    device_class: water
+    state_class: "measurement"
   - name: "Total Water Used"
     device_class: "water"
     state_class: "total_increasing"
